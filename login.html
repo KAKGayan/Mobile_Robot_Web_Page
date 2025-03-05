@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Mobile Robot Controlling</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Login</a>
+        <a href="monitor.html">Control</a>
+        <a href="downloads.html">Downloads</a>
+    </nav>
+
+    <header>
+        <h1>Login</h1>
+    </header>
+
+    <main class="container">
+        <div class="card login">
+            <h2>Login</h2>
+            <form id="login-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+                <label for="ip">IP Address:</label>
+                <input type="text" id="ip" name="ip" required>
+                <button type="submit" class="button" id="submit">Login</button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mobile Robot Project</p>
+    </footer>
+
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-database-compat.js"></script>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJCd4k0-FVM_X4H4fTQXkSaNVJ2gC5VEc",
+            authDomain: "mywebpage-29697.firebaseapp.com",
+            projectId: "mywebpage-29697",
+            storageBucket: "mywebpage-29697.appspot.com",
+            messagingSenderId: "75823835877",
+            appId: "1:75823835877:web:a2c85f3ce58af3af64820c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        document.getElementById("login-form").addEventListener('submit', function (e) {
+            e.preventDefault();
+            const username = document.getElementById("username").value;
+            const password = document.getElementById("password").value;
+            const ip = document.getElementById("ip").value;
+
+            // Validate inputs
+            if (!username || !password || !ip) {
+                alert("All fields are required!");
+                return;
+            }
+
+            // Store data in Firebase and sessionStorage
+            firebase.database().ref('users/' + username).set({
+                username: username,
+                password: password,
+                ip: ip
+            }).then(() => {
+                // Save username and IP address to sessionStorage
+                sessionStorage.setItem('username', username);
+                sessionStorage.setItem('ip', ip);
+                alert("Login Successful!");
+                window.location.href = 'monitor.html';
+            }).catch((error) => {
+                console.error("Error storing user data:", error);
+            });
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor - Mobile Robot Monitoring</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-app-compat.js"></script>
+    <!-- Firebase Realtime Database -->
+    <script src="https://www.gstatic.com/firebasejs/9.18.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html">Login</a>
+        <a href="monitor.html">Control</a>
+        <a href="downloads.html">Downloads</a>
+    </nav>
+
+    <header>
+        <h1>Mobile Robot Controlling</h1>
+    </header>
+
+    <main class="container">
+        <div class="card video-stream">
+            <h2>Live Video Stream</h2>
+            <img id="video" src="{{ url_for('video_feed') }}" alt="Live Video" width="100%">
+            <video id="video" autoplay width="100%"></video>
+        </div>
+
+        <div class="card controls">
+            <h2>Controls</h2>
+            <div class="button-group">
+                <button class="button" onclick="sendCommand('forward')">Forward</button><br>
+                <button class="button" onclick="sendCommand('left')">Left</button>
+                <button class="button" onclick="sendCommand('right')">Right</button><br>
+                <button class="button" onclick="sendCommand('backward')">Backward</button>
+            </div>
+        </div>
+
+        <div class="card system-info">
+            <h2>System Information</h2>
+            <p>IP Address: <span id="ip-address">--</span></p>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Mobile Robot Project</p>
+    </footer>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCJCd4k0-FVM_X4H4fTQXkSaNVJ2gC5VEc",
+            authDomain: "mywebpage-29697.firebaseapp.com",
+            projectId: "mywebpage-29697",
+            storageBucket: "mywebpage-29697.appspot.com",
+            messagingSenderId: "75823835877",
+            appId: "1:75823835877:web:a2c85f3ce58af3af64820c"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Retrieve the username from sessionStorage
+        const username = sessionStorage.getItem('username');
+
+        function sendCommand(command) {
+            if (!username) {
+                alert("User not logged in!");
+                return;
+            }
+
+            const commandRef = firebase.database().ref('commands/' + username);
+            commandRef.push({
+                command: command,
+                timestamp: Date.now()
+            }).then(() => {
+                console.log('Command sent:', command);
+            }).catch((error) => {
+                console.error('Error sending command:', error);
+            });
+        }
+
+        function updateSystemInfo() {
+            const systemInfoRef = firebase.database().ref('system_info/' + username);
+            systemInfoRef.once('value').then(snapshot => {
+                const data = snapshot.val();
+                document.getElementById('ip-address').textContent = data ? data.ip_address : '--';
+                document.getElementById('battery').textContent = data ? data.battery : '--';
+            }).catch(error => {
+                console.error('Error fetching system info:', error);
+            });
+        }
+        async function startWebcam() {
+            const video = document.getElementById('video');
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+            } catch (error) {
+                console.error('Error accessing webcam:', error);
+            }
+        }
+
+        setInterval(updateSystemInfo, 1000);
+        startWebcam();
+    </script>
+
+</body>
+</html>
